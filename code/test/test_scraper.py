@@ -29,6 +29,3 @@ class TestHolidaysCalendarScraper(unittest.TestCase):
         
     def tearDown(self):
         self.holidays_calendar_scraper.end_scraping()
-    
-if __name__ == '__main__':
-    unittest.main()
