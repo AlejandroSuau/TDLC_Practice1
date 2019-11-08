@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+"""
 from classes.holidays_calendar_scraper import HolidaysCalendarScraper
 
 chrome_driver_path = '/Users/Suau/Desktop/ChromeDriver/chromedriver.exe'
@@ -11,3 +12,4 @@ scraped_data = scraper.get_scraped_data()
 scraper.end_scraping()
 
 print(*scraped_data, sep="\n\n")
+"""

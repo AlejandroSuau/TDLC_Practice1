@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from classes.holiday_row import HolidayType
+
 class Constants(object):
     DATES_FORMAT = "%d-%m-%Y"
     MOVED_STRING_INDICATOR = 'se traslada'
@@ -14,9 +16,20 @@ class Constants(object):
     MONTHS_CONTAINER_ID = 'wrapIntoMeses'
     MONTHS_DIV_CLASS_NAME = 'mes'
     
-    NATIONAL_COLORED_BOXES_CLASS_NAME = 'cajaFestivoN'
-    NATIONAL_STRING_SPAN_CLASS_NAME = 'festivoN'
-    AUTONOMOUS_COLORED_BOXES_CLASS_NAME = 'cajaFestivoR'
-    AUTONOMOUS_STRING_SPAN_CLASS_NAME = 'festivoR'
-    LOCAL_COLORED_BOXES_CLASS_NAME = 'cajaFestivoP'
-    LOCAL_STRING_SPAN_CLASS_NAME = 'festivoP'
+    BOX_DAY_REF = 'COLORED_BOXES_CLASS_NAME'
+    STRING_DAY_REF = 'STRING_SPAN_CLASS_NAME'
+    
+    HOLIDAYS_REFS = {
+        HolidayType.NATIONAL: {
+            BOX_DAY_REF: 'cajaFestivoN',
+            STRING_DAY_REF: 'festivoN'
+        },
+        HolidayType.AUTONOMOUS: {
+            BOX_DAY_REF: 'cajaFestivoR',
+            STRING_DAY_REF: 'festivoR'
+        },
+        HolidayType.LOCAL: {
+            BOX_DAY_REF: 'cajaFestivoP',
+            STRING_DAY_REF: 'festivoP'
+        }   
+    }

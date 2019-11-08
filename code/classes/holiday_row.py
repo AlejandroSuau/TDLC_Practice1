@@ -18,5 +18,5 @@ class HolidayRow:
         self.moved_date_from = moved_date_from
     
     def __str__(self):
-        return ("\"{}\",{},{},{},{}".format(
+        return ("\"{}\",{},\"{}\",{},{}".format(
                 self.name, self.date, self.province, self.holiday_type, self.moved_date_from))

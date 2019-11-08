@@ -56,8 +56,8 @@ class HolidaysCalendarScraper:
             self.current_scraping_province, next_url = self.scrap_text_and_href_from_link(element)
             
             while (next_url is not None):
-                self.browser.get(next_url)                
-                self.add_holiday_rows_to_scraped_data()
+                self.browser.get(next_url)   
+                self.add_all_calendar_holidays_to_scraped_data()
                 self.current_scraping_year, next_url = self.scrap_previous_year()
             
  
@@ -92,33 +92,16 @@ class HolidaysCalendarScraper:
         """
         return (element.text, element.get_property(Constants.HREF_PROPERTY))  
     
-    def add_holiday_rows_to_scraped_data(self):
+    def add_all_calendar_holidays_to_scraped_data(self):
         """
         
-        It returns the holidays days from the provinces own page.
-        
-        Returns:
-            array (HolidayRow): array of HolidayRow objects.
+        It collects all the holidays of the calendar and add them to the variable
+        scraped data.
         
         """
         for i, div in enumerate(self.scrap_month_divs()):
             self.current_scraping_month = i+1
-            
-            local_holidays_info = self.scrap_holidays_days_info_from_div(
-                    Constants.NATIONAL_COLORED_BOXES_CLASS_NAME, 
-                    Constants.NATIONAL_STRING_SPAN_CLASS_NAME, div)               
-            self.add_holidays_info(local_holidays_info, HolidayType.NATIONAL)
-            
-            autonomous_holidays_info = self.scrap_holidays_days_info_from_div(
-                    Constants.AUTONOMOUS_COLORED_BOXES_CLASS_NAME,
-                    Constants.AUTONOMOUS_STRING_SPAN_CLASS_NAME, div)
-            self.add_holidays_info(autonomous_holidays_info, HolidayType.AUTONOMOUS)
-            
-            national_holidays_info = self.scrap_holidays_days_info_from_div(
-                    Constants.LOCAL_COLORED_BOXES_CLASS_NAME,
-                    Constants.LOCAL_STRING_SPAN_CLASS_NAME, div)
-            self.add_holidays_info(national_holidays_info, HolidayType.LOCAL)
-    
+            self.scrap_all_holidays_info_from_div(div)
 
     def scrap_month_divs(self):
         """
@@ -136,26 +119,34 @@ class HolidaysCalendarScraper:
         
         return month_divs
 
-    def scrap_holidays_days_info_from_div(self, box_class_name, string_class_name, div):
+    def scrap_all_holidays_info_from_div(self, div):
+        """
+            It scrapes all holiday info from a month div.
+        """
+        for holiday_type in Constants.HOLIDAYS_REFS.keys():
+            self.scrap_holidays_info_from_div_by_type(div, holiday_type)
+        
+
+    def scrap_holidays_info_from_div_by_type(self, div, holiday_type):
         """
         
-        It scrapes all holidays info from every month div.
+        It scrapes all holidays info from a div where it's type is holiday_type
     
         Args:
-            box_class_name (string): css class name of colored boxes.
-            string_class_name (string): css class name of colored strings.
-            div(WebElement): month div which contains date elements.
+            div (WebElement): month div which contains date elements.
+            holiday_type (string): HolidayType value.
 
         Returns:
-            array (tuples (int, int/None, string)): Array of tuples. 
+            array (tuples (int, int/None, string, string)): Array of tuples. 
                 Each tuple contains (holiday day number, holiday day 
-                moved from if it has, holiday title)
+                moved from if it has, holiday title and, holiday type)
                 
         """    
-        colored_boxes = div.find_elements(By.CLASS_NAME, box_class_name)        
-        colored_spans = div.find_elements(By.CLASS_NAME, string_class_name)
+        colored_boxes = div.find_elements(By.CLASS_NAME,
+                                          Constants.HOLIDAYS_REFS[holiday_type][Constants.BOX_DAY_REF])        
+        colored_spans = div.find_elements(By.CLASS_NAME,
+                                          Constants.HOLIDAYS_REFS[holiday_type][Constants.STRING_DAY_REF])
         
-        holidays = []
         for i, box in enumerate(colored_boxes):            
             string_line = colored_spans[i].find_element_by_xpath('..').text
             string_line_parts = string_line.split('.')
@@ -170,41 +161,45 @@ class HolidaysCalendarScraper:
                 holiday_name = string_line_right_part
             
             holiday_day = int(box.text)
-            holiday = (holiday_day, holiday_day_moved_from, holiday_name)
-            holidays.append(holiday)
+            holiday_info = (holiday_day, holiday_day_moved_from, holiday_name, holiday_type)
+            
+            holiday_row = self.create_HolidayRow_from_info(holiday_info)
+            
+            self.scraped_data.append(str(holiday_row))
+
         
-        return holidays
-        
-    def add_holidays_info(self, holidays_list_info, holiday_type):
+    def create_HolidayRow_from_info(self, holiday_info):
         """
 
         It creates every HolidayRow element and appends it as an string to the
         scraped_data variable.
 
         Args:
-            holidays_list_info (array): array of tuples according with the 
+            holiday_info (tuple): tuple according with the 
                 scrap_holidays_days_info_from_div method. Every element is
-                a tuple of 3 values (int, int/None, string).
-            holiday_type (string): Its a value from the HolidayType's enum.
-
+                a tuple of 4 values (int, int/None, string, string).
+                
+        Returns:
+            HolidayRow: object transformed with the holiday_info.
         """
-        for info in holidays_list_info:
-            holiday_day = info[0]
-            holiday_day_moved_from = info[1]
-            holiday_name = info[2]
-            
-            holiday_date = date(self.current_scraping_year, self.current_scraping_month,
-                                holiday_day).strftime(Constants.DATES_FORMAT)
-            
-            if holiday_day_moved_from is None:
-                holiday_date_moved_from = None
-            else:
-                holiday_date_moved_from = date(self.current_scraping_year, self.current_scraping_month,
-                                               holiday_day_moved_from).strftime(Constants.DATES_FORMAT)
-            
-            holiday_row = HolidayRow(holiday_name, holiday_date, self.current_scraping_province,
-                                     holiday_type, holiday_date_moved_from)
-            self.scraped_data.append(str(holiday_row))
+        holiday_day = holiday_info[0]
+        holiday_day_moved_from = holiday_info[1]
+        holiday_name = holiday_info[2]
+        holiday_type = holiday_info[3]
+        
+        holiday_date = date(self.current_scraping_year, self.current_scraping_month,
+                            holiday_day).strftime(Constants.DATES_FORMAT)
+        
+        if holiday_day_moved_from is None:
+            holiday_date_moved_from = None
+        else:
+            holiday_date_moved_from = date(self.current_scraping_year, self.current_scraping_month,
+                                           holiday_day_moved_from).strftime(Constants.DATES_FORMAT)
+        
+        holiday_row = HolidayRow(holiday_name, holiday_date, self.current_scraping_province,
+                                 holiday_type, holiday_date_moved_from)
+        
+        return holiday_row
     
     def scrap_previous_year(self):
         """
@@ -233,9 +228,18 @@ class HolidaysCalendarScraper:
         
         """
         self.browser.quit()
-
-    def get_browser(self):
-        return self.browser
+    
+    def navigate_to_url(self, url):
+        self.browser.get(url)
     
     def get_scraped_data(self):
         return self.scraped_data
+    
+    def set_current_scraping_province(self, s):
+        self.current_scraping_province = s
+    
+    def set_current_scraping_year(self, x):
+        self.current_scraping_year = x
+    
+    def set_current_scraping_month(self, x):
+        self.current_scraping_month = x
