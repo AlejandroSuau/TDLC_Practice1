@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from datetime import date
 
-from classes.holiday_row import HolidayType, HolidayRow
+from classes.holiday_row import HolidayRow
 from classes.holidays_calendar_constants import Constants
 
 class HolidaysCalendarScraper:
@@ -101,7 +101,7 @@ class HolidaysCalendarScraper:
         """
         for i, div in enumerate(self.scrap_month_divs()):
             self.current_scraping_month = i+1
-            self.scrap_all_holidays_info_from_div(div)
+            self.add_all_holidays_from_div_to_scraped_data(div)
 
     def scrap_month_divs(self):
         """
@@ -119,15 +119,15 @@ class HolidaysCalendarScraper:
         
         return month_divs
 
-    def scrap_all_holidays_info_from_div(self, div):
+    def add_all_holidays_from_div_to_scraped_data(self, div):
         """
             It scrapes all holiday info from a month div.
         """
         for holiday_type in Constants.HOLIDAYS_REFS.keys():
-            self.scrap_holidays_info_from_div_by_type(div, holiday_type)
+            self.add_holidays_by_type_from_div_to_scraped_data(div, holiday_type)
         
 
-    def scrap_holidays_info_from_div_by_type(self, div, holiday_type):
+    def add_holidays_by_type_from_div_to_scraped_data(self, div, holiday_type):
         """
         
         It scrapes all holidays info from a div where it's type is holiday_type

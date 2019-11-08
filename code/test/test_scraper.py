@@ -4,6 +4,7 @@ import unittest
 
 from classes.holidays_calendar_scraper import HolidaysCalendarScraper
 from classes.holiday_row import HolidayType
+from classes.holidays_calendar_constants import Constants
 
 class TestHolidaysCalendarScraper(unittest.TestCase):
     
@@ -39,18 +40,18 @@ class TestHolidaysCalendarScraper(unittest.TestCase):
         self.assertEqual(holidays_len, 14)
     
     def test_scrap_month_divs_methods(self):
+        
         self.scraper.navigate_to_url(self.url_alava_2019)
-
-        self.scraper.set_current_scraping_province('Álava')
-        self.scraper.set_current_scraping_year(2019)
         
         month_divs = self.scraper.scrap_month_divs()
         self.assertEqual(len(month_divs), 12)
         
-        april_div = month_divs[4]
-        days_info = self.scraper.scrap_all_holidays_info_from_div(
-                april_div)
-        self.assertEqual(len(days_info), 4)
+        self.scraper.set_current_scraping_province('Álava')
+        self.scraper.set_current_scraping_year(2019)
+        self.scraper.set_current_scraping_month(4)
+
+        self.scraper.add_all_holidays_from_div_to_scraped_data(month_divs[3])
+        self.assertEqual(len(self.scraper.get_scraped_data()), 4)        
     
     def test_create_HolidayRow_from_info(self):
         self.scraper.navigate_to_url(self.url_alava_2019)
@@ -69,6 +70,6 @@ class TestHolidaysCalendarScraper(unittest.TestCase):
         (previous_year, url) = self.scraper.scrap_previous_year()
         self.assertIsNone(previous_year)
         self.assertIsNone(url)
-      
+     
     def tearDown(self):
         self.scraper.end_scraping()
