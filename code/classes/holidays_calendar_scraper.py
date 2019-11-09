@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from datetime import date
+from numpy import random
 
 from classes.holiday_row import HolidayRow
 from classes.holidays_calendar_constants import Constants
@@ -15,7 +17,6 @@ class HolidaysCalendarScraper:
     
         Args:
             chrome_driver_path (string): chromes driver path.
-            starting_url (string): url
         
         Attributes:
             chrome_driver_path (string): chromes driver path.
@@ -24,20 +25,26 @@ class HolidaysCalendarScraper:
             current_scraping_province (string): the province which is currently scraping.
             current_scraping_year (int): the year which is currently scraping.
             current_scraping_month (int): the month which is currently scraping.
+            time_sleep_delays (array[int]): sleep seconds between page navigation.
+            num_executed_urls (int): number of executed urls.
             scraped_data (array): the list of strings parsed from HolidayRow 
                 objects with its __str__ method.
                 
     """
     
-    def __init__(self, chrome_driver_path, starting_url):
+    def __init__(self, chrome_driver_path):
         self.chrome_driver_path = chrome_driver_path
-        self.starting_url = starting_url
+        self.starting_url = 'https://www.calendarioslaborales.com/calendario-laboral-alava-2019.htm'
         
         self.browser = webdriver.Chrome(self.chrome_driver_path)
         
-        self.current_scraping_province = None
-        self.current_scraping_year = None
-        self.current_scraping_month = None
+        self.current_scraping_province = 'Álava'
+        self.current_scraping_year = 2019
+        self.current_scraping_month = 1
+        
+        self.time_sleep_delays = [7, 4, 6, 2, 1, 3]
+        self.num_executed_urls = 0
+        self.waited_seconds = 0
         
         self.scraped_data = []
     
@@ -49,17 +56,21 @@ class HolidaysCalendarScraper:
         
         """
         self.browser.get(self.starting_url)
+        self.num_executed_urls += 1
         
-        starting_year = 2019
         for element in self.scrap_provinces_a_elements():
-            self.current_scraping_year = starting_year
             self.current_scraping_province, next_url = self.scrap_text_and_href_from_link(element)
             
             while (next_url is not None):
-                self.browser.get(next_url)   
+                self.make_random_sleep()
+                self.browser.get(next_url)
+                
                 self.add_all_calendar_holidays_to_scraped_data()
+                
                 self.current_scraping_year, next_url = self.scrap_previous_year()
-            
+                self.num_executed_urls += 1
+                break
+            break
  
     def scrap_provinces_a_elements(self):
         """
@@ -77,6 +88,16 @@ class HolidaysCalendarScraper:
         
         return left_provinces_a
     
+    
+    def make_random_sleep(self):
+        """
+        
+        It makes a random sleep in the execution.
+        
+        """
+        delay = random.choice(self.time_sleep_delays)
+        self.waited_seconds += delay
+        time.sleep(delay)
 
     def scrap_text_and_href_from_link(self, element):
         """
@@ -231,6 +252,9 @@ class HolidaysCalendarScraper:
     
     def navigate_to_url(self, url):
         self.browser.get(url)
+    
+    def get_starting_url(self):
+        return self.starting_url
     
     def get_scraped_data(self):
         return self.scraped_data
