@@ -39,8 +39,9 @@ class HolidaysCalendarScraper:
         
         self.browser = webdriver.Chrome(self.chrome_driver_path)
         
+        self.starting_year = 2019
         self.current_scraping_province = 'Álava'
-        self.current_scraping_year = 2019
+        self.current_scraping_year = self.starting_year
         self.current_scraping_month = 1
         
         self.time_sleep_delays = [7, 4, 6, 2, 10, 19]
@@ -63,8 +64,11 @@ class HolidaysCalendarScraper:
         self.browser.get(self.starting_url)
         self.num_executed_urls += 1
         
-        for element in self.scrap_provinces_a_elements():
-            self.current_scraping_province, next_url = self.scrap_text_and_href_from_link(element)
+        i = 0
+        provinces = self.scrap_provinces_a_elements()
+        while (i < len(provinces)):
+            self.current_scraping_year = self.starting_year
+            self.current_scraping_province, next_url = self.scrap_text_and_href_from_link(provinces[i])
             
             while (next_url is not None):
                 self.make_random_sleep()
@@ -74,8 +78,9 @@ class HolidaysCalendarScraper:
                 
                 self.current_scraping_year, next_url = self.scrap_previous_year()
                 self.num_executed_urls += 1
-                break
-            break
+            
+            provinces = self.scrap_provinces_a_elements()
+            i += 1
  
     def scrap_provinces_a_elements(self):
         """
@@ -284,7 +289,7 @@ class HolidaysCalendarScraper:
         print("- Num of executed URLs: {}.".format(self.num_executed_urls))
         print("- Seconds waited between navigations: {}.".format(self.waited_seconds))
         print("- Num of holidays: {}.".format(len(self.scraped_data)))
-        print("- Data: \n\n")
+        print("- Data: \n")
         print(*self.scraped_data, sep="\n")
         print("\n\n**** END SCRAPING INFO ****\n")
     
