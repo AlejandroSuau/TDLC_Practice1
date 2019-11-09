@@ -28,6 +28,8 @@ class HolidaysCalendarScraper:
             current_scraping_month (int): the month which is currently scraping.
             time_sleep_delays (array[int]): sleep seconds between page navigation.
             num_executed_urls (int): number of executed urls.
+            waited_seconds (int): number of intentionally sleep seconds.
+            execution_time (int): number of seconds to execution the whole process.
             scraped_data (array): the list of strings parsed from HolidayRow 
                 objects with its __str__ method.
                 
