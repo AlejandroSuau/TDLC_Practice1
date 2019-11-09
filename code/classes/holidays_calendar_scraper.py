@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import csv
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -42,10 +43,11 @@ class HolidaysCalendarScraper:
         self.current_scraping_year = 2019
         self.current_scraping_month = 1
         
-        self.time_sleep_delays = [7, 4, 6, 2, 1, 3]
+        self.time_sleep_delays = [7, 4, 6, 2, 10, 19]
         self.num_executed_urls = 0
         self.waited_seconds = 0
         
+        self.csv_header = ['Name', 'Date', 'Province', 'Type', 'Moved Date From']
         self.scraped_data = []
     
     def start_scraping(self):
@@ -186,7 +188,7 @@ class HolidaysCalendarScraper:
             
             holiday_row = self.create_HolidayRow_from_info(holiday_info)
             
-            self.scraped_data.append(str(holiday_row))
+            self.scraped_data.append(holiday_row.__repr__())
 
         
     def create_HolidayRow_from_info(self, holiday_info):
@@ -249,6 +251,23 @@ class HolidaysCalendarScraper:
         
         """
         self.browser.quit()
+    
+    def create_csv_with_scraped_data(self, csv_name):
+        """
+        
+        It creates a csv with the scraped data.
+        
+        Args:
+            csv_name (string): new csv files name.
+        
+        """
+        file_path = '../csv/' + csv_name + '.csv'
+        with open(file_path, 'w+', newline = '') as f:
+            writer = csv.writer(f, delimiter=';')
+            writer.writerow(self.csv_header)
+            writer.writerows(self.scraped_data)
+            
+        f.close()
     
     def navigate_to_url(self, url):
         self.browser.get(url)

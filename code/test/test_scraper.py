@@ -4,7 +4,6 @@ import unittest
 
 from classes.holidays_calendar_scraper import HolidaysCalendarScraper
 from classes.holiday_row import HolidayType
-from classes.holidays_calendar_constants import Constants
 
 class TestHolidaysCalendarScraper(unittest.TestCase):
     
@@ -47,7 +46,8 @@ class TestHolidaysCalendarScraper(unittest.TestCase):
 
         holiday_info = (29, 28, 'San Prudencio', HolidayType.LOCAL)
         holiday_row = self.scraper.create_HolidayRow_from_info(holiday_info)
-        self.assertEqual(str(holiday_row), '"San Prudencio",29-04-2019,"Álava",Local,28-04-2019')
+        self.assertEqual(holiday_row.__repr__(), ['San Prudencio',
+                         '29-01-2019','Álava','Local','28-01-2019'])
         
     def test_scrap_previous_year_none(self):
         self.scraper.navigate_to_url('https://www.calendarioslaborales.com/calendario-laboral-alava-2006.htm')
