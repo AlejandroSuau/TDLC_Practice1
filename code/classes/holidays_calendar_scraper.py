@@ -271,7 +271,7 @@ class HolidaysCalendarScraper:
         
         """
         file_path = '../csv/' + csv_name + '.csv'
-        with open(file_path, 'w+', newline = '') as f:
+        with open(file_path, 'w+', newline = '', encoding="utf-8") as f:
             writer = csv.writer(f, delimiter=';')
             writer.writerow(self.csv_header)
             writer.writerows(self.scraped_data)
