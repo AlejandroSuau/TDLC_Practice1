@@ -2,7 +2,7 @@
 
 from classes.holidays_calendar_scraper import HolidaysCalendarScraper
 
-chrome_driver_path = '/Users/Suau/Desktop/ChromeDriver/chromedriver.exe'
+chrome_driver_path = 'introduce/chromedriver.exe/path'
 scraper = HolidaysCalendarScraper(chrome_driver_path)
 
 scraper.start_scraping()
