@@ -46,6 +46,7 @@ class HolidaysCalendarScraper:
         self.time_sleep_delays = [7, 4, 6, 2, 10, 19]
         self.num_executed_urls = 0
         self.waited_seconds = 0
+        self.execution_time = 0
         
         self.csv_header = ['Name', 'Date', 'Province', 'Type', 'Moved Date From']
         self.scraped_data = []
@@ -57,6 +58,8 @@ class HolidaysCalendarScraper:
         of every province.
         
         """
+        self.execution_time = time.time()
+        
         self.browser.get(self.starting_url)
         self.num_executed_urls += 1
         
@@ -250,6 +253,7 @@ class HolidaysCalendarScraper:
         Ends the scraping by closing the browser.
         
         """
+        self.execution_time = time.time() - self.execution_time
         self.browser.quit()
     
     def create_csv_with_scraped_data(self, csv_name):
@@ -268,6 +272,21 @@ class HolidaysCalendarScraper:
             writer.writerows(self.scraped_data)
             
         f.close()
+    
+    def print_scraping_info(self):
+        """
+        
+        It prints info about the scraping done.
+        
+        """
+        print("\n**** SCRAPING INFO ****\n\n")
+        print("- Execution time: {0:0.1f} seconds.".format(self.execution_time))
+        print("- Num of executed URLs: {}.".format(self.num_executed_urls))
+        print("- Seconds waited between navigations: {}.".format(self.waited_seconds))
+        print("- Num of holidays: {}.".format(len(self.scraped_data)))
+        print("- Data: \n\n")
+        print(*self.scraped_data, sep="\n")
+        print("\n\n**** END SCRAPING INFO ****\n")
     
     def navigate_to_url(self, url):
         self.browser.get(url)
